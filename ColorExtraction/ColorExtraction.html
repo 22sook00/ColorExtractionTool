@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColorExtraction Tool</title>
+  <link rel="stylesheet" href="./ColorExtraction.css" />
+</head>
+
+<body>
+  <main>
+    <h1>ColorExtraction Tool</h1>
+    <p>
+      <span class="box" id="pixelColor" data-label="Current Pixel"></span>
+      <canvas data-src="/sampleImg.jpeg" width="900" height="500"></canvas>
+    </p>
+    <section class="colours">
+      <!-- saved colours here -->
+    </section>
+
+    <div class="selected-color"></div>
+  </main>
+  <script src="./ColorExtraction.js" defer></script>
+</body>
+
+</html>
