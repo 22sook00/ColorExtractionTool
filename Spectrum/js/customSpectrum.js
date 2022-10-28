@@ -1,68 +1,125 @@
-$(function () {
-  $("#triggerSet").spectrum({
-    // type: "flat",
-    togglePaletteOnly: true,
+function showColorPicker(selectedTrigger){
+  if(!selectedTrigger) return ;
+  $(selectedTrigger).spectrum({
     showInput: true,
     showInitial: true,
     showButtons: true,
-    replacerClassName: 'test',
-    // chooseText: "선택", 
-    // togglePaletteMoreText: 'Show more',
-    // togglePaletteLessText: 'Hide',
-    //저장하지 않은 상태에서 외부를 클릭했을 때 자동 저장이 됨.
     clickoutFiresChange: true,
     maxSelectionSize: 10,
     palette: [["#f4cccc", "#fce5cd", "#fff2cc","#d9ead3","#d0e0e3","#cfe2f3","#d9d2e9","#ead1dc"]],
     move: function(color) { 
       color.toHexString();
     },
+    beforeShow: function (color) {
+      color && color.toHexString();
+  },
   });
 
-  $("#triggerSet").show();
-  $("#triggerSet").on('move.spectrum', function(e, color) { 
-    $('.preview-div').css('background-color',color.toHexString())
+  $(selectedTrigger).show();
+  $(selectedTrigger).on('move.spectrum', function(e, color) {
+      const targetID = e.target.id
+      getTriggerColorByID(targetID,color.toRgbString())
   });
 
-  
-  document.querySelector('.sp-clear').addEventListener('click',()=>{
-    $('.preview-div').css('background-color','#fffff');
-  })
 
-  const eyeDropperButton = `<button class="pick-color-btn">
-  <span class="material-symbols-outlined">
-    colorize
-  </span>
-  Pick Color</button>`
+  function customColorModule(){
+    const triggerLength = $('.trigger').length;
+    for(let i= 1 ; i<=triggerLength; i++){
 
-  $('.sp-palette-container').append(eyeDropperButton);
+      let palette = $('.sp-palette')[i-1];
+      let cancel = $('.sp-cancel')[i-1];
+      let clear = $('.sp-clear')[i-1];
+      let input = $('.sp-input')[i-1];
+      let triggerIDX = $('.trigger')[i-1];
+      $(clear).addClass(`sp-clear-${i}`)
+      $(cancel).addClass(`sp-cancel-${i}`)
+      $(input).addClass(`sp-input-${i}`)
+      
+      //흰색으로 돌아가기
+      document.querySelector(`.sp-clear-${i}`).addEventListener('click',()=>{
+      
+        getTriggerColorByID(triggerIDX.id,'transparent')
+      })
+      //이전으로 돌아가기
+      $(selectedTrigger).on('beforeShow.spectrum', function (e, color) {
+        document.querySelector(`.sp-cancel-${i}`).addEventListener('click', () => {
+          getTriggerColorByID(triggerIDX.id,color.toRgbString())
+        })
+       
+      });
 
-  document.querySelector('.pick-color-btn').addEventListener('click', () => {
-    const eyeDropper = new EyeDropper();
-    if (!window.EyeDropper) {
-      console.dir('Your browser does not support the EyeDropper API!')
-      return;
+      document.getElementById(triggerIDX.id).addEventListener('keyup', function(e){handleKeyUpSearch(e,triggerIDX.id)});
+      document.querySelector(`.sp-input-${i}`).addEventListener('keyup', function(e){handleKeyUpSearch(e,triggerIDX.id)} ); 
+      
+      //각각 버튼에 아이드로퍼 추가
+      $(palette).after(`<button class="pick-color-trigger pick-color-trigger-${i}">
+      <span class="material-symbols-outlined">
+        colorize
+      </span>
+      Pick Color</button>`);
+      document.querySelector(`.pick-color-trigger-${i}`).addEventListener('click', () => {
+        const eyeDropper = new EyeDropper();
+        if (!window.EyeDropper) {
+          console.dir('Your browser does not support the EyeDropper API!')
+          return;
+        }
+        eyeDropper.open().then((result) => {
+        let eyeDropperCOLOR = result.sRGBHex;
+        $(triggerIDX).spectrum("set",eyeDropperCOLOR);
+        getTriggerColorByID(triggerIDX.id,eyeDropperCOLOR);
+    
+        }).catch((e) => {
+          console.dir('err!')
+        });
+      });
     }
-    eyeDropper.open().then((result) => {
-    rgbaColor = result.sRGBHex;
-    //preview 부분
-    $("#triggerSet").spectrum("set",rgbaColor);
-    $('.preview-div').css('background-color',rgbaColor);
-    }).catch((e) => {
-      console.dir('err!')
-    });
-  });
+  }
+  customColorModule();
 
-  // function hexToRgbA(hex){
-  //   let c;
-  //   if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
-  //     console.log('hehe',hex,hex.substring(1))
-  //       c= hex.substring(1).split('');
-  //       if(c.length== 3){
-  //           c= [c[0], c[0], c[1], c[1], c[2], c[2]];
-  //       }
-  //       c= '0x'+c.join('');
-  //       return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',1)';
-  //   }
-  //   throw new Error('Bad Hex');
-  // }
-});
+function handleKeyUpSearch(e,triggerID) {
+  const keyupCOLOR = e.target.value;
+    if(keyupCOLOR[0]==='#'){
+      if(keyupCOLOR.length ===7){
+        $(`#${triggerID}`).spectrum("set",keyupCOLOR);
+        getTriggerColorByID(triggerID,keyupCOLOR);
+      }else{
+        return;
+      }
+    } 
+    else{
+      if(keyupCOLOR.length ===6){
+        $(`#${triggerID}`).spectrum("set", `#${keyupCOLOR}`);
+        getTriggerColorByID(triggerID,`#${keyupCOLOR}`);
+      }else{
+        return;
+      }
+    }
+  }
+
+  //!trigger id 구하기 함수
+  function getTriggerColorByID(targetID,color){
+
+    //triggerID 는 #제외한 순수 아이디만 전달해준다.
+    //color 는 스트링값으로 보내준다.
+    const targetIDwithSHARP = $(`#${targetID}`);
+    let targetCOLOR = targetIDwithSHARP.parents('.color-trigger-section').find('.applied-color');
+    targetCOLOR.addClass(`${targetID}-applied-color`);
+    targetCOLOR.css('background',color)
+
+    // let originBgCOLOR = document.querySelector('.applied-color')?.style.backgroundColor
+    // let originBorderCOLOR = $('.22triggerSet-applied-color')[0].style.borderColor
+    let originBgCOLOR; 
+    if(targetID === '33triggerSet' ){
+      $('.preview-div').css('background', color);
+    }else if(targetID === '22triggerSet') {
+      $('.preview-div').css('border-color', color);
+    }else{
+      $('.preview-div').hover(function(){
+        originBgCOLOR = $('.33triggerSet-applied-color') && $('.33triggerSet-applied-color')[0].style.background
+        $(this).css('background',color)},
+        function(){$(this).css('background',originBgCOLOR);
+      });
+    }
+  }
+}
+showColorPicker();

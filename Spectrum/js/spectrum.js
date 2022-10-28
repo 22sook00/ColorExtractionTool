@@ -51,7 +51,7 @@
         containerClassName: "",
         replacerClassName: "",
         showAlpha: true,
-        theme: "sp-light",
+        theme:'sp-light',
         palette: [
             ["#000000","#444444","#5b5b5b","#999999","#bcbcbc","#eeeeee","#f3f6f4","#ffffff"],
             ["#f44336","#744700","#ce7e00","#8fce00","#2986cc","#16537e","#6a329f","#c90076"],
@@ -99,6 +99,9 @@
             "<div class='sp-container sp-hidden'>",
                 "<div class='sp-palette-container'>",
                     "<div class='sp-palette sp-thumb sp-cf'></div>",
+                    "<button class='pick-color-btn'>",
+                    "<span class='material-symbols-outlined'>colorize</span>",
+                    "Pick Color</button>",
                     "<div class='sp-palette-button-container sp-cf'>",
                         "<button type='button' class='sp-palette-toggle'></button>",
                     "</div>",
@@ -135,6 +138,7 @@
             "</div>"
         ].join("");
     })();
+
 
     function paletteTemplate (p, color, className, opts) {
         var html = [];
@@ -245,7 +249,8 @@
             currentPreferredFormat = opts.preferredFormat,
             clickoutFiresChange = !opts.showButtons || opts.clickoutFiresChange,
             isEmpty = !initialColor,
-            allowEmpty = opts.allowEmpty;
+            allowEmpty = opts.allowEmpty,
+            pickButton = container.find(".pick-color-btn");
 
         // Element to be updated with the input color. Populated in initialize method
         var originalInputContainer = null,
@@ -265,6 +270,7 @@
                 });
             }
         }
+        
         
         function applyOptions() {
 
@@ -313,6 +319,26 @@
             }
 
             applyOptions();
+
+
+            /*!here */
+            pickButton.click(function(){
+                const eyeDropper = new EyeDropper();
+                if (!window.EyeDropper) {
+                  console.dir('Your browser does not support the EyeDropper API!')
+                  return;
+                }
+                eyeDropper.open().then((result) => {
+                let rgbaColor = result.sRGBHex;
+                //preview 부분
+                $("#triggerSet").spectrum("set",rgbaColor);
+                $('.preview-div').css('background-color',rgbaColor);
+                }).catch((e) => {
+                  console.dir('err!')
+                });
+            });
+               
+            
 
             originalInputContainer = $('<span class="sp-original-input-container"></span>');
             ['margin'].forEach(function(cssProp) {
@@ -642,6 +668,7 @@
         }
 
         function setFromTextInput(value) {
+            console.log('setFromTextInputvalval',value)
             if (abortNextInputChange) { abortNextInputChange = false; return; }
             if ((value === null || value === "") && allowEmpty) {
                 set(null);
@@ -750,6 +777,7 @@
         }
 
         function set(color, ignoreFormatChange) {
+            console.log('set  ccolor',color)
             if (tinycolor.equals(color, get())) {
                 // Update UI just in case a validation error needs
                 // to be cleared.
@@ -940,6 +968,9 @@
                 displayColor = '',
                 hasChanged = !tinycolor.equals(color, colorOnShow);
 
+
+            console.log('updateOriginalInput color',color)
+
             if (color) {
                 displayColor = color.toString(currentPreferredFormat);
                 // Update the selection palette with the current color
@@ -967,6 +998,8 @@
             slideHelperHeight = slideHelper.height();
             alphaWidth = alphaSlider.width();
             alphaSlideHelperWidth = alphaSlideHelper.width();
+
+            console.log('rrdr',opts.offset, dragWidth)
 
             if (!flat) {
                 container.css("position", "absolute");
@@ -1032,6 +1065,7 @@
         }
 
         function setOffset(coord) {
+            console.log("coord",coord)
             opts.offset = coord;
             reflow();
         }
@@ -1048,6 +1082,7 @@
             disable: disable,
             offset: setOffset,
             set: function (c) {
+                console.log('ccccc',c)
                 set(c);
                 updateOriginalInput();
             },
@@ -1079,6 +1114,8 @@
         var offsetTop = offset.top;
 
         offsetTop += inputHeight;
+
+        console.log('offsetTop?',input,offsetTop)
 
         offsetLeft -=
             Math.min(offsetLeft, (offsetLeft + dpWidth > viewWidth && viewWidth > dpWidth) ?

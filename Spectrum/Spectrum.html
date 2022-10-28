@@ -19,12 +19,28 @@
 <body>
   <main>
     <section class="picker-section">
-      <input type='text' value='blanchedalmond' name='triggerSet' id='triggerSet' />
-      <!-- <button class="pick-color-btn">
-        <span class="material-symbols-outlined">
-          colorize
-        </span>
-        Pick Color</button> -->
+      <!-- <div class="btn1" style="border: 3px solid red; height: 50px;">btn</div> -->
+      <section class="color-trigger-section">
+        <div class="preview-dot-wrapper">
+          <div class="preview-dot applied-color"></div>
+        </div>
+        <input type='text' value='blanchedalmond' name='triggerSet' id='triggerSet' class="trigger" />
+      </section>
+      <section class="color-trigger-section">
+        <div class="preview-dot-wrapper">
+          <div class="preview-dot applied-color"></div>
+        </div>
+        <input autocomplete="off" type='text' value='blanchedalmond' name='triggerSet' id='22triggerSet'
+          class="trigger" />
+      </section>
+      <section class="color-trigger-section">
+        <div class="preview-dot-wrapper">
+          <div class="preview-dot applied-color"></div>
+        </div>
+        <input autocomplete="off" type='text' value='blanchedalmond' name='triggerSet' id='33triggerSet'
+          class="trigger" />
+      </section>
+
     </section>
     <section class="test-colors">
       <div class="colors">
@@ -39,6 +55,10 @@
     </section>
   </main>
   <script src=" ./js/customSpectrum.js">
+  </script>
+  <script>
+    let selectedTrigger = $('.trigger');
+    showColorPicker(selectedTrigger)
   </script>
 
 </body>
